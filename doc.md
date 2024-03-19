@@ -125,6 +125,7 @@ public class EmailServiceImpl {
 ###### Email Service ( Salva in redis, invia email, retrive delle email dal server usando pop3s)
 
 ```
+
 @Service
 public class EmailService {
 
@@ -140,46 +141,59 @@ public class EmailService {
     @Autowired
     private Store store;
 
-    public void fetchAndProcessEmails() throws MessagingException, IOException {
-
-        Message[] messages = inbox.getMessages();
-        for (Message message : messages) {
-            String subject = message.getSubject();
-            String from = InternetAddress.toString(message.getFrom());
-            String content = message.getContent().toString();
-
-            // Process the email here, for example, you might save it to a database
-            // or perform some other action based on the email content.
-
-            System.out.println("Subject: " + subject);
-            System.out.println("From: " + from);
-            System.out.println("Content: " + content);
-        }
-
-        inbox.close(false);
-        store.close();
-    }
-
     public String inboxMessage() throws Exception {
 
         // Recupera i messaggi
         Message[] messages = inbox.getMessages();
-
+        List<String> cc = new ArrayList<>();
+        EmailObj obj = new EmailObj();
         // Converti i messaggi in una lista di oggetti JSON
         List<Map<String, Object>> emails = new ArrayList<>();
+        
         for (Message message : messages) {
+
             Map<String, Object> emailData = new HashMap<>();
             emailData.put("from", Arrays.toString(message.getFrom()));
             emailData.put("subject", message.getSubject());
             emailData.put("content", message.getContent().toString());
             emailData.put("to", Arrays.toString(message.getAllRecipients()));
+            emailData.put("sentDate", message.getSentDate());
+            Address[] ccRecipients = message.getRecipients(Message.RecipientType.CC);
+
+            if (ccRecipients != null && ccRecipients.length > 0) {
+                for (Address address : ccRecipients) {
+                    cc.add(address.toString());
+                }
+                emailData.put("cc", Arrays.toString(ccRecipients));
+            } else {
+                emailData.put("cc", ""); // If no CC recipients
+            }
             emails.add(emailData);
+
+            obj.setEmailId(null);
+            obj.setDestinatario(emailData.get("to").toString());
+            obj.setMittente(emailData.get("from").toString());
+            obj.setEmailObject(emailData.get("subject").toString());
+            obj.setEmailBody(emailData.get("content").toString());
+            obj.setDateSend(emailData.get("sentDate").toString());
+            obj.setState(false);
+            obj.setCCs(cc);
+            RedisCommands<String, String> syncCommands = connection.sync();
+
+            syncCommands.hset("Email_" + obj.getEmailId(), "Email_UUUID", obj.getEmailId().toString());
+            syncCommands.hset("Email_" + obj.getEmailId(), "Mittente", obj.getMittente());
+            syncCommands.hset("Email_" + obj.getEmailId(), "Destinatario", obj.getDestinatario());
+            syncCommands.hset("Email_" + obj.getEmailId(), "CCs", obj.getCCs().toString());
+            syncCommands.hset("Email_" + obj.getEmailId(), "Email_Object", obj.getEmailObject());
+            syncCommands.hset("Email_" + obj.getEmailId(), "Email_Body", obj.getEmailBody());
+            syncCommands.hset("Email_" + obj.getEmailId(), "Date_Send", obj.getDateSend());
+            syncCommands.hset("Email_" + obj.getEmailId(), "State", obj.isState().toString());
+
         }
 
         // Converti la lista di email in JSON
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         String json = gson.toJson(emails);
-    
 
         // Chiudi la cartella "inbox" e lo store
         inbox.close(false);
@@ -188,17 +202,6 @@ public class EmailService {
     }
 
     public String saveEmail(EmailObj obj) {
-        //Effettuo il Sync della connessione per poi salvare i dati
-        RedisCommands<String, String> syncCommands = connection.sync();
-
-        syncCommands.hset("Email_" + obj.getEmailId(), "Email_UUUID", obj.getEmailId().toString());
-        syncCommands.hset("Email_" + obj.getEmailId(), "Mittente", obj.getMittente());
-        syncCommands.hset("Email_" + obj.getEmailId(), "Destinatario", obj.getDestinatario());
-        syncCommands.hset("Email_" + obj.getEmailId(), "CCs", obj.getCCs().toString());
-        syncCommands.hset("Email_" + obj.getEmailId(), "Email_Object", obj.getEmailObject());
-        syncCommands.hset("Email_" + obj.getEmailId(), "Email_Body", obj.getEmailBody());
-        syncCommands.hset("Email_" + obj.getEmailId(), "Date_Send", obj.getDateSend());
-        syncCommands.hset("Email_" + obj.getEmailId(), "State", obj.isState().toString());
 
         // Converti l'oggetto EmailObj in formato JSON utilizzando Jackson
         ObjectMapper mapper = new ObjectMapper();
@@ -208,7 +211,7 @@ public class EmailService {
         } catch (JsonProcessingException e) {
             // Gestione dell'eccezione, ad esempio logger.error("Errore durante la
             // conversione in JSON", e);
-            jsonRecord = "{}"; 
+            jsonRecord = "{}";
         }
 
         emailService.sendSimpleMessage(obj);
@@ -353,3 +356,16 @@ public class EmailObj {
 }
 
 ```
+
+#### Flusso di dati: 
+POP3 è unidirezionale, scaricando e-mail dal server al dispositivo. Post Office Protocol – Versione 3.
+SMTP è utilizzato per inviare email. Simple Mail Transfer Protocol.
+IMAP è bidirezionale e consente di gestire le tue email su più dispositivi in modo sincronizzato. Internet Message Access Protocol.
+
+#### Memorizzazione delle email: 
+POP3 rimuove le email dal server e le memorizza sul dispositivo locale.
+
+In conclusione, la scelta tra POP3, SMTP e IMAP dipende dalle tue esigenze specifiche. 
+Se hai bisogno di accedere alle tue email da più dispositivi in modo sincronizzato, IMAP è la scelta migliore. 
+Se desideri scaricare le tue mail localmente, POP3 potrebbe essere la soluzione ideale. 
+Infine, per un invio affidabile delle tue comunicazioni, il protocollo SMTP è sicuramente il più efficiente.

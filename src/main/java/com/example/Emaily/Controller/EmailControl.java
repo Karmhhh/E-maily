@@ -36,7 +36,7 @@ public class EmailControl {
 
     @PostMapping("/newEmail")
     public String saveEmail(@RequestBody EmailObj obj) throws JsonProcessingException {
-        return emailService.saveEmail(obj);
+        return emailService.sendNewEmail(obj);
     }
 
     @GetMapping("/retriveMails")

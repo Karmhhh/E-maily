@@ -20,7 +20,7 @@ public class EmailServiceImpl {
         message.setSubject(obj.getEmailObject());
         message.setText(obj.getEmailBody());
         for (String cc : obj.getCCs()) {
-            message.setCc(cc);  
+            message.setCc(cc.toString());  
         }
         emailSender.send(message);
     }

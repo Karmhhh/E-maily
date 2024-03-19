@@ -16,7 +16,7 @@ public class EmailObj {
     private String emailObject;
     private String emailBody;
     private List<String> ccs = new ArrayList<>();
-    private LocalDateTime dateSend;
+    private String dateSend;
     private boolean state;
 
     public UUID getEmailId() {
@@ -73,11 +73,16 @@ public class EmailObj {
     }
 
     public String getDateSend() {
-        return dateSend.toString();
+        return dateSend;
     }
 
-    public void setDateSend(LocalDateTime dateSend) {
-        this.dateSend = LocalDateTime.now();
+    public void setDateSend(String dataString) {
+        if (dataString == null) {
+
+            this.dateSend = LocalDateTime.now().toString();
+        } else {
+            this.dateSend = dataString;
+        }
     }
 
     public Integer isState() {
