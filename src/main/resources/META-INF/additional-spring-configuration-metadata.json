@@ -1,0 +1,32 @@
+{"properties": [
+  {
+    "name": "myserver.host",
+    "type": "java.lang.String",
+    "description": "A description for 'myserver.host'"
+  },
+  {
+    "name": "myserver.port",
+    "type": "java.lang.String",
+    "description": "A description for 'myserver.port'"
+  },
+  {
+    "name": "connection.variable",
+    "type": "java.lang.String",
+    "description": "A description for 'connection.variable'"
+  },
+  {
+    "name": "pop3.port",
+    "type": "java.lang.String",
+    "description": "A description for 'pop3.port'"
+  },
+  {
+    "name": "pop3.username",
+    "type": "java.lang.String",
+    "description": "A description for 'pop3.username'"
+  },
+  {
+    "name": "pop3.password",
+    "type": "java.lang.String",
+    "description": "A description for 'pop3.password'"
+  }
+]}
