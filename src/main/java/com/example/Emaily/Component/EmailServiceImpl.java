@@ -1,5 +1,9 @@
 package com.example.Emaily.Component;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -19,9 +23,8 @@ public class EmailServiceImpl {
         message.setTo(obj.getDestinatario());
         message.setSubject(obj.getEmailObject());
         message.setText(obj.getEmailBody());
-        for (String cc : obj.getCCs()) {
-            message.setCc(cc.toString());  
-        }
+        message.setCc(obj.getCCs().toArray(new String[obj.getCCs().size()]));
+    
         emailSender.send(message);
     }
 }
