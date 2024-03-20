@@ -28,5 +28,40 @@
     "name": "pop3.password",
     "type": "java.lang.String",
     "description": "A description for 'pop3.password'"
+  },
+  {
+    "name": "protocol",
+    "type": "java.lang.String",
+    "description": "A description for 'protocol'"
+  },
+  {
+    "name": "store.host",
+    "type": "java.lang.String",
+    "description": "A description for 'store.host'"
+  },
+  {
+    "name": "session.host",
+    "type": "java.lang.String",
+    "description": "A description for 'session.host'"
+  },
+  {
+    "name": "session.port",
+    "type": "java.lang.String",
+    "description": "A description for 'session.port'"
+  },
+  {
+    "name": "session.starttls",
+    "type": "java.lang.String",
+    "description": "A description for 'session.starttls'"
+  },
+  {
+    "name": "session.auth",
+    "type": "java.lang.String",
+    "description": "A description for 'session.auth'"
+  },
+  {
+    "name": "session.portintgr",
+    "type": "java.lang.String",
+    "description": "A description for 'session.portintgr'"
   }
 ]}
